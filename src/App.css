@@ -1,0 +1,10 @@
+.bg-green{
+background-color: rgb(194, 255, 194);
+}
+.bg-red{
+background-color: rgb(255, 152, 152);
+}
+.cards{
+display: flex;
+justify-content: space-between;
+}
