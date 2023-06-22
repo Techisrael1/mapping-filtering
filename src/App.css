@@ -8,3 +8,9 @@ background-color: rgb(255, 152, 152);
 display: flex;
 justify-content: space-between;
 }
+.cardss{
+pointer-events: none;
+}
+.cad{
+display: flex;
+}

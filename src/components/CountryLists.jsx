@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Country from "./Country";
 import { BsFilter } from "react-icons/bs";
-import ReactPaginate from "react-paginate";
 
 const CountryLists = () => {
 	const [countries, setCountries] = useState([]);
 	const [filteredCountries, setFilteredCountries] = useState([]);
-	const [filterValue, setFilterValue] = useState("");
-	const [currentPage, setCurrentPage] = useState(0);
-	const [perPage] = useState(10); // Number of countries to display per page
+	const [filteredValue, setFilteredValue] = useState("");
+	const [presentPage, setPresentPage] = useState(1);
+	const [eachPage] = useState(10);
 
 	useEffect(() => {
 		fetch("https://restcountries.com/v2/all?fields=name,region,area")
@@ -20,40 +19,47 @@ const CountryLists = () => {
 			.catch((error) => console.log(error));
 	}, []);
 
-	const handleFilter = (event) => {
-		const inputValue = event.target.value;
-		setFilterValue(inputValue);
-
+	const handleFilter = () => {
 		const filtered = countries.filter((country) => {
-			const isNameMatch = country.name.toLowerCase().includes(inputValue.toLowerCase());
+			const matchName = country.name
+				.toLowerCase()
+				.includes(filteredValue.toLowerCase());
 
-			const isSmallerThanLithuania = country.area < getCountryArea("Lithuania");
+			const smallerToLuthiana = country.area < getArea("Lithuania");
 
-			const isInOceania = country.region.toLowerCase() === "oceania";
+			const inOceania = country.region.toLowerCase() === "oceania";
 
-			return isNameMatch && isSmallerThanLithuania && isInOceania;
+			return matchName && smallerToLuthiana && inOceania;
 		});
 
 		setFilteredCountries(filtered);
 	};
 
-	const getCountryArea = (countryName) => {
+	const getArea = (countryName) => {
 		const country = countries.find(
 			(c) => c.name.toLowerCase() === countryName.toLowerCase()
 		);
 		return country ? country.area : 0;
 	};
 
-	const handlePageChange = ({ selected }) => {
-		setCurrentPage(selected);
-	};
+	const lastIndex = presentPage * eachPage;
+	const firstIndex = lastIndex - eachPage;
+	const paginatedCountries = filteredCountries.slice(firstIndex, lastIndex);
+	const pageCount = Math.ceil(filteredCountries.length / eachPage);
+	const numbers = [...Array(pageCount + 1).keys()].slice(1);
 
-	const pageCount = Math.ceil(filteredCountries.length / perPage);
-	const offset = currentPage * perPage;
-	const paginatedCountries = filteredCountries.slice(
-		offset,
-		offset + perPage
-	);
+	const prePage = () => {
+		if (presentPage !== firstIndex) setPresentPage(presentPage - 1);
+	};
+	const changePage = (c) => {
+		setPresentPage(c);
+	};
+	const nextPage = () => {
+		if (presentPage !== lastIndex) setPresentPage(presentPage + 1);
+	};
+	const active = (pageNumber, currentPage) => {
+		return pageNumber === currentPage ? "active" : "";
+	};
 
 	return (
 		<div className="container-fluid-sm container p-5">
@@ -65,45 +71,66 @@ const CountryLists = () => {
 							className="form-control"
 							placeholder="Enter Country"
 							aria-label="Enter Country"
-							aria-describedby="basic-addon2"
-							onChange={handleFilter}
-							onClick={handleFilter}
+							aria-describedby="bac-addon2"
+							value={filteredValue}
+							onChange={(event) =>
+								setFilteredValue(event.target.value)
+							}
 						/>
-						<span
+						<button
 							className="input-group-text bg-primary text-white"
-							id="basic-addon2"
+							id="bac-addon2"
+							onClick={handleFilter}
 						>
-							<BsFilter value={filterValue} />
-						</span>
+							<BsFilter />
+						</button>
 					</div>
-					<div class="btn-group" role="group" aria-label="...">
+					<div className="btn-group" role="group" aria-label="...">
 						<div
-							class="btn-group me-2"
+							className="btn-group me-2"
 							role="group"
 							aria-label="First group"
-						>
-							<ReactPaginate
-								previousLabel={"Previous"}
-								nextLabel={"Next"}
-								breakLabel={"..."}
-								breakClassName={"page-item"}
-								breakLinkClassName={"page-link"}
-								pageCount={pageCount}
-								marginPagesDisplayed={1}
-								pageRangeDisplayed={3}
-								onPageChange={handlePageChange}
-								containerClassName={"pagination"}
-								subContainerClassName={"pages pagination"}
-								activeClassName={"active"}
-								pageClassName={"page-item"}
-								pageLinkClassName={"page-link"}
-								previousClassName={"page-item"}
-								previousLinkClassName={"page-link"}
-								nextClassName={"page-item"}
-								nextLinkClassName={"page-link"}
-							/>
-						</div>
+						></div>
 					</div>
+					<nav>
+						<ul className="d-flex Pagination">
+							<div className="page-item">
+								<a
+									href="#"
+									className="page-link"
+									onClick={prePage}
+								>
+									Prev
+								</a>
+							</div>
+							{numbers.map((c, i) => (
+								<li
+									className={`page-item ${active(
+										c,
+										presentPage
+									)}`}
+									key={i}
+								>
+									<a
+										href="#"
+										className="page-link"
+										onClick={() => changePage(c)}
+									>
+										{c}
+									</a>
+								</li>
+							))}
+							<li className="page-item">
+								<a
+									href="#"
+									className="page-link"
+									onClick={nextPage}
+								>
+									Next
+								</a>
+							</li>
+						</ul>
+					</nav>
 				</div>
 				{paginatedCountries.map((c) => (
 					<Country
