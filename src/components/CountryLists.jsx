@@ -7,7 +7,7 @@ const CountryLists = () => {
 	const [filteredCountries, setFilteredCountries] = useState([]);
 	const [filteredValue, setFilteredValue] = useState("");
 	const [presentPage, setPresentPage] = useState(1);
-	const [eachPage] = useState(10);
+	const [eachPage] = useState(25);
 
 	useEffect(() => {
 		fetch("https://restcountries.com/v2/all?fields=name,region,area")
